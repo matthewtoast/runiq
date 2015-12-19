@@ -1,0 +1,9 @@
+; compute fibonacci value for 8 ;
+
+(ycomb (lambda fn n
+    '(if (<= n 2)
+        '(1)
+     else
+        '(+ (ycomb fn (- n 1))
+            (ycomb fn (- n 2))))
+) 8)

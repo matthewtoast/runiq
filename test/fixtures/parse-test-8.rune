@@ -1,0 +1,7 @@
+
+(here-is-json `
+    {
+    "foo": "bar",
+    "baz": "qux"
+    }
+` `[1,2,3]`)

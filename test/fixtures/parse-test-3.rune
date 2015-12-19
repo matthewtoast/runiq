@@ -1,0 +1,17 @@
+;multiline;
+
+(foo          "hey"  )
+ 
+ (bar "hey
+")
+ (baz "
+hey" )
+(baz "hey
+there"      )
+            (baz "
+
+hey
+
+there
+
+   ")

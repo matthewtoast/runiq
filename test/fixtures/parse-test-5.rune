@@ -1,0 +1,10 @@
+
+
+(string-with-escapes "
+
+    \" DOES THIS WORK? \"
+     \"HMM I HOPE SO\"
+
+    \" YES
+    \" INDEED
+")

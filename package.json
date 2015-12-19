@@ -1,0 +1,40 @@
+{
+  "name": "runiq",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "matthewtoast/runiq",
+  "bugs": "https://github.com/matthewtoast/runiq/issues",
+  "description": "A little scripting language interpreted by JavaScript and inspired by Lisp",
+  "author": "Matthew Trost <matthew@trost.co>",
+  "bin": {
+    "runiq": "bin/runiq.js"
+  },
+  "scripts": {
+    "lint": "eslint ./**/*.js",
+    "test": "npm run lint && tape ./test/**/*.test.js | tap-spec",
+    "benchmarks": "node test/performance/filter.benchmark.js && node test/performance/fibonacci.benchmark.js"
+  },
+  "dependencies": {
+    "commander": "^2.9.0",
+    "crypto-js": "^3.1.5",
+    "json-stable-stringify": "^1.0.0",
+    "lodash": "^3.10.1",
+    "lodash.assign": "^3.2.0",
+    "lodash.clonedeep": "^3.0.2",
+    "lodash.isequal": "^3.0.4",
+    "lodash.trunc": "^3.0.4",
+    "loglevel": "^1.4.0",
+    "moment": "^2.10.6",
+    "seedrandom": "^2.4.2",
+    "sprintf-js": "^1.0.3",
+    "superagent": "^1.4.0",
+    "url-parse": "^1.0.4"
+  },
+  "devDependencies": {
+    "benchmark": "^1.0.0",
+    "eslint": "^1.8.0",
+    "lodash": "^3.10.1",
+    "tap-spec": "^4.1.0",
+    "tape": "^4.2.2"
+  }
+}
