@@ -1,7 +1,7 @@
 'use strict';
 
-function Builder() {
-    this.library = {
+function Builder(library) {
+    this.library = library || {
         types: {},
         casters: {},
         constants: {},
