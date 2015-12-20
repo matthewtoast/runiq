@@ -360,7 +360,7 @@ function _entityToValue(item, lib, scope) {
 }
 
 function _outOfGasError(inst) {
-    var error = 'Script timed out and/or arrived at a negative balance!';
+    var error = 'Script timed out and/or arrived at a negative balance';
     return new Error(error);
 }
 
