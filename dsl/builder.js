@@ -48,6 +48,7 @@ Builder.prototype.defineFunction = function(name, spec) {
     this.library.functions[name] = spec.implementation;
     this.library.inputs[name] = spec.signature[0];
     this.library.outputs[name] = spec.signature[1];
+    if (spec.impure === true) spec.implementation.impure = true;
     return this;
 };
 
