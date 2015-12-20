@@ -1,27 +1,18 @@
 'use strict';
 
+var Assign = require('lodash.assign');
+
 function Builder(library) {
-    this.library = library || {
+    this.library = Assign({}, {
         types: {},
         casters: {},
         constants: {},
         functions: {},
         prices: {},
         inputs: {},
-        outputs: {},
-        scopes: {}
-    };
+        outputs: {}
+    }, library || {});
 }
-
-Builder.prototype.defineScope = function(name, entry) {
-    var builder = new Builder();
-    this.defineFunction(name, entry);
-    if (this.library.scopes[name]) {
-        console.warn('Runiq: DSL is redefining scope `' + name + '`');
-    }
-    this.library.scopes[name] = builder.exportLibrary();
-    return builder;
-};
 
 Builder.prototype.defineType = function(name, spec) {
     if (this.library.types[name]) {
@@ -45,6 +36,7 @@ Builder.prototype.defineFunction = function(name, spec) {
     if (this.library.functions[name]) {
         console.warn('Runiq: DSL is redefining function `' + name + '`');
     }
+
     this.library.functions[name] = spec.implementation;
     this.library.inputs[name] = spec.signature[0];
     this.library.outputs[name] = spec.signature[1];

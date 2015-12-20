@@ -78,7 +78,7 @@ Interpreter.prototype.run = function(list, argv, event, cb) {
         var typeError = Types.preflightCheck(this, list, this.library, {});
         if (typeError) return cb(_wrapError(typeError, this, list));
     }
-    return exec(this, list, argv, event, {}, cb);
+    return exec(this, list, argv, event, cb);
 };
 
 /**
@@ -91,9 +91,9 @@ Interpreter.prototype.run = function(list, argv, event, cb) {
  * @param [event] {Object|null} - Event object with `.name` and `.payload`
  * @param [cb] {Function} - Node-style callback function
 */
-Interpreter.prototype.step = function(list, argv, event, scope, cb) {
+Interpreter.prototype.step = function(list, argv, event, cb) {
     if (this.options.debug) Console.printDebug(this, list);
-    return step(this, list, argv, event, scope, cb);
+    return step(this, list, argv, event, cb);
 };
 
 // Update balance with debit/credit; return T/F if script can continue.
@@ -105,22 +105,22 @@ function ok(inst, transaction) {
 }
 
 // Used for early exiting the program on timeout/negative balance
-function exit(inst, state, fin, scope) {
-    return fin(_wrapError(_outOfGasError(inst), inst, state), state, scope);
+function exit(inst, state, fin) {
+    return fin(_wrapError(_outOfGasError(inst), inst, state), state);
 }
 
 // Recursively execute a list in the context of the passed-in instance.
-function exec(inst, raw, argv, event, scope, fin) {
+function exec(inst, raw, argv, event, fin) {
     var after = nextup(inst, raw, argv, event, fin);
-    return step(inst, raw, argv, event, scope, passthrough(after, scope));
+    return step(inst, raw, argv, event, passthrough(after));
 }
 
 // Return callback to produce a usable value, or continue execution
 function nextup(inst, orig, argv, event, cb) {
-    return function nextupCallback(err, data, scope) {
-        if (err) return cb(err, null, scope);
-        if (_isQuoted(data)) return cb(null, _unquote(data), scope);
-        if (_isValue(data)) return cb(null, _entityToValue(data, inst.library, scope), scope);
+    return function nextupCallback(err, data) {
+        if (err) return cb(err, null);
+        if (_isQuoted(data)) return cb(null, _unquote(data));
+        if (_isValue(data)) return cb(null, _entityToValue(data, inst.library));
         // Remove any nulls or undefineds from the list
         var compact = _compactList(data);
         // Allow the programmer to opt out for _minor_ perf gains
@@ -128,22 +128,22 @@ function nextup(inst, orig, argv, event, cb) {
             // If no change, we'll keep looping forever, so just return
             if (IsEqual(orig, compact)) {
                 Console.printWarning(inst, 'Detected irreducible list; exiting...');
-                return cb(null, compact, scope);
+                return cb(null, compact);
             }
         }
-        return exec(inst, compact, argv, event, scope, cb);
+        return exec(inst, compact, argv, event, cb);
     };
 }
 
 // Perform one step of execution to the given list, and return the AST.
-function step(inst, raw, argv, event, scope, fin) {
-    if (!_isPresent(raw)) return fin(_wrapError(_badInput(inst), inst, raw), null, scope);
+function step(inst, raw, argv, event, fin) {
+    if (!_isPresent(raw)) return fin(_wrapError(_badInput(inst), inst, raw), null);
     var list = _safeObject(_denestList(raw));
-    return branch(inst, list, argv, event, scope, fin);
+    return branch(inst, list, argv, event, fin);
 }
 
 // Force flow through a set timeout prior to executing the given list
-function branch(inst, list, argv, event, scope, fin) {
+function branch(inst, list, argv, event, fin) {
     if (argv.length > 0) {
         // Append the argv for programs that return
         // a list that accepts them as parameters
@@ -160,41 +160,45 @@ function branch(inst, list, argv, event, scope, fin) {
     // However, it could prove unworkable depending on browser support
     // for catching call-stack errors.
     try {
-        return unload(inst, list, argv, event, scope, fin);
+        return unload(inst, list, argv, event, fin);
     }
     catch (e) {
         return setTimeout(function branchCallback() {
-            return unload(inst, list, argv, event, scope, fin);
+            return unload(inst, list, argv, event, fin);
         }, 0);
     }
 }
 
 // Delegate to a subprocessor based on the list type: quote, list, seq
-function unload(inst, list, argv, event, scope, fin) {
+function unload(inst, list, argv, event, fin) {
     inst.counter++;
     if (inst.options.debug) Console.printDebug(inst, list);
-    if (_isQuote(list))
-        return quote(inst, list, argv, event, scope, fin);
-    if (_isFunc(list) && _callReady(list))
-        return invoke(inst, list, argv, event, scope, fin);
-    return sequence(inst, list, argv, event, scope, fin);
+    if (_isQuote(list)) {
+        return quote(inst, list, argv, event, fin);
+    }
+    if (_isFunc(list)) {
+        if (_callReady(list)) {
+            return invoke(inst, list, argv, event, fin);
+        }
+    }
+    return sequence(inst, list, argv, event, fin);
 }
 
 // Given a quote list, return a quote object for later use
-function quote(inst, list, argv, event, scope, fin) {
+function quote(inst, list, argv, event, fin) {
     // Remember to charge for the 'quote' function as a transaction
-    if (!ok(inst, inst.options.quoteTransaction)) return exit(inst, list, fin, scope);
+    if (!ok(inst, inst.options.quoteTransaction)) return exit(inst, list, fin);
     var entity = list[list.length - 1];
-    if (_isValue(entity)) return fin(null, entity, scope);
+    if (_isValue(entity)) return fin(null, entity);
     var quotation = {};
     quotation[RUNIQ_QUOTED_ENTITY_PROP_NAME] = entity;
-    return fin(null, quotation, scope);
+    return fin(null, quotation);
 }
 
 // Execute a list that is a 'function' (i.e. begins with a keyword)
-function invoke(inst, list, argv, event, scope, fin) {
+function invoke(inst, list, argv, event, fin) {
     // All invocations cost some amount just for running
-    if (!ok(inst, inst.options.invokeTransaction)) return exit(inst, list, fin, scope);
+    if (!ok(inst, inst.options.invokeTransaction)) return exit(inst, list, fin);
     var name = _getFnName(list);
     var args = _getFnArgs(list);
     var library = inst.library;
@@ -202,7 +206,7 @@ function invoke(inst, list, argv, event, scope, fin) {
 
     // Prepare the arguments and context
     _unquoteArgs(args);
-    _valuefyArgs(args, library, scope);
+    _valuefyArgs(args, library);
     var ctx = {
         id: inst.counter,
         seed: inst.seednum,
@@ -215,10 +219,10 @@ function invoke(inst, list, argv, event, scope, fin) {
     };
 
     // Function (or global fallback)
-    lookup = library.lookupFunction(name, scope);
+    lookup = library.lookupFunction(name);
     if (!_isPresent(lookup)) {
         var missing = inst.options.functionMissingName;
-        var fallback = library.lookupFunction(missing, scope);
+        var fallback = library.lookupFunction(missing);
         if (fallback) {
             lookup = fallback;
             name = missing;
@@ -226,115 +230,108 @@ function invoke(inst, list, argv, event, scope, fin) {
     }
     if (lookup) {
         // The library may define function prices
-        var price = library.lookupPrice(name, scope);
+        var price = library.lookupPrice(name);
         if (_isPresent(price)) {
             if (!ok(inst, -price)) {
-                return exit(inst, list, fin, scope);
+                return exit(inst, list, fin);
             }
         }
         // Type checking
         if (inst.options.doRuntimeTypeCheck) {
-            var typeError = Types.runtimeCheck(inst, name, library, args, scope);
-            if (typeError) return fin(_wrapError(typeError, inst, list), null, scope);
+            var typeError = Types.runtimeCheck(inst, name, library, args);
+            if (typeError) return fin(_wrapError(typeError, inst, list), null);
         }
-        if (library.isImpureFunction(name, scope)) {
+        if (library.isImpureFunction(name)) {
             if (!inst.options.allowImpureFunctions) {
-                return fin(_wrapError(_impurityError(inst), inst, list), null, scope);
+                return fin(_wrapError(_impurityError(inst), inst, list), null);
             }
             if (inst.options.warnOnImpureFunctions) {
                 Console.printWarning(inst, 'Function `' + name + '` is labeled impure');
             }
         }
-        var invokeArgs = args.concat(passthrough(fin, scope));
+        var invokeArgs = args.concat(passthrough(fin));
         return lookup.apply(ctx, invokeArgs);
     }
 
     // Type conversion
-    lookup = library.lookupTypeCaster(name, scope);
+    lookup = library.lookupTypeCaster(name);
     if (lookup) {
-        return fin(null, lookup.apply(ctx, args), scope);
+        return fin(null, lookup.apply(ctx, args));
     }
 
     // Constant
-    lookup = library.lookupConstant(name, scope);
+    lookup = library.lookupConstant(name);
     if (_isPresent(lookup)) {
-        if (args.length < 1) return fin(null, lookup, scope);
+        if (args.length < 1) return fin(null, lookup);
         list[RUNIQ_INDEX_OF_FUNCTION_NAME] = lookup;
-        return fin(null, list, scope);
+        return fin(null, list);
     }
 
     // Without any args present, return the string
-    if (args.length < 1) return fin(null, name, scope);
+    if (args.length < 1) return fin(null, name);
 
     // If no other option, just return the entire list
-    return fin(null, list, scope);
+    return fin(null, list);
 }
 
-// Callback wrapper for invoked functions that adds to the scope chain
-function passthrough(fin, scope) {
+// Callback wrapper for passing data through library functions (currently no-op)
+function passthrough(fin) {
     return function passthroughCallback(err, data) {
-        return fin(err, data, scope);
+        return fin(err, data);
     };
 }
 
 // Get values for each list element. Subproc any elements that are lists
-function sequence(inst, elems, argv, event, scope, fin) {
-    // Add scoped functions whenever a function is being processed
-    if (_isFunc(elems)) {
-        var library = inst.library;
-        var name = _getFnName(elems);
-        var newScope = library.lookupScope(name, scope);
-        if (newScope) scope = newScope;
-    }
-    if (elems.length < 1) return fin(null, elems, scope);
+function sequence(inst, elems, argv, event, fin) {
+    if (elems.length < 1) return fin(null, elems);
     // Running a sequence also costs some amount per element to sequence
     if (!ok(inst, inst.options.sequenceTransaction * elems.length)) {
-        return exit(inst, list, fin, scope);
+        return exit(inst, list, fin);
     }
-    return parallel(inst, elems, argv, event, scope, fin, postSequence);
+    return parallel(inst, elems, argv, event, fin, postSequence);
 }
 
 // Run the sequence in parallel
-function parallel(inst, elems, argv, event, scope, fin, _postSequence) {
+function parallel(inst, elems, argv, event, fin, _postSequence) {
     var total = elems.length;
     var complete = 0;
-    function check(err, list, _scope) {
+    function check(err, list) {
         if (total === ++complete) {
-            if (!_isFunc(list)) return _postSequence(list, fin, _scope);
-            return fin(err, list, _scope);
+            if (!_isFunc(list)) return _postSequence(list, fin);
+            return fin(err, list);
         }
     }
     for (var i = 0; i < total; i++) {
         if (_isList(elems[i])) {
-            var after = edit(inst, elems, i, argv, event, scope, check);
-            branch(inst, elems[i], argv, event, scope, after);
+            var after = edit(inst, elems, i, argv, event, check);
+            branch(inst, elems[i], argv, event, after);
         }
         else {
-            check(null, elems, scope);
+            check(null, elems);
         }
     }
 }
 
 // Fire this function after completing a sequence of lists
-function postSequence(elems, fin, scope) {
+function postSequence(elems, fin) {
     // Treat the final value of a sequence as its return value
     var toReturn = elems[elems.length - 1];
-    return fin(null, toReturn, scope);
+    return fin(null, toReturn);
 }
 
 // Return a function to patch a subroutine result into a parent list
-function edit(inst, list, index, argv, event, scope, fin) {
+function edit(inst, list, index, argv, event, fin) {
     return function editCallback(err, data) {
-        if (err) return fin(err, null, scope);
+        if (err) return fin(err, null);
         list[index] = data;
-        return fin(null, list, scope);
+        return fin(null, list);
     };
 }
 
 // Convert 'const' args to their values when they are defined
-function _valuefyArgs(args, lib, scope) {
+function _valuefyArgs(args, lib) {
     for (var i = 0; i < args.length; i++) {
-        args[i] = _entityToValue(args[i], lib, scope);
+        args[i] = _entityToValue(args[i], lib);
     }
 }
 
@@ -346,10 +343,10 @@ function _unquoteArgs(args) {
 }
 
 // Convert a given entity to a value, if one is defined in the lib
-function _entityToValue(item, lib, scope) {
+function _entityToValue(item, lib) {
     if (typeof item === JS_STRING_TYPE) {
         // Only JSON-serializable entities may be put into a list
-        var constant = lib.lookupConstant(item, scope);
+        var constant = lib.lookupConstant(item);
         if (constant !== undefined) return constant;
     }
     // Also unquote any item we got that also happens to be a quote

@@ -14,15 +14,15 @@ Tape('interpreter stepping', function(t) {
         0.5999999999999996
     ];
     t.plan(steps.length - 1);
-    function doStep(i, scope) {
-        interpreter.step(steps[i], [], null, scope, function(err, result, _scope) {
+    function doStep(i) {
+        interpreter.step(steps[i], [], null, function(err, result) {
             var outcome = JSON.stringify(result);
             var expected = JSON.stringify(steps[i + 1]);
             t.equal(outcome, expected);
             if (i < (steps.length - 2)) {
-                doStep(i + 1, _scope);
+                doStep(i + 1);
             }
         });
     }
-    doStep(0, {});
+    doStep(0);
 });

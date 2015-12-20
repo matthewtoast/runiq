@@ -12,8 +12,8 @@ function _isPresent(thing) {
     return thing !== undefined && thing !== null;
 }
 
-function runtimeCheck(inst, name, library, args, scope) {
-    var inputs = library.lookupInputs(name, scope);
+function runtimeCheck(inst, name, library, args) {
+    var inputs = library.lookupInputs(name);
     var message;
     if (_isPresent(inputs) && inputs !== true) {
         if (inputs === false) {
