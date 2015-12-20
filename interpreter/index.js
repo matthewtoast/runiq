@@ -56,7 +56,9 @@ Interpreter.DEFAULT_OPTIONS = {
     doIrreducibleListCheck: true,
     doRuntimeTypeCheck: true,
     doPreflightTypeCheck: true,
-    functionMissingName: 'function-missing'
+    functionMissingName: 'function-missing',
+    allowImpureFunctions: true,
+    warnOnImpureFunctions: true
 };
 
 /**
@@ -235,6 +237,14 @@ function invoke(inst, list, argv, event, scope, fin) {
             var typeError = Types.runtimeCheck(inst, name, library, args, scope);
             if (typeError) return fin(_wrapError(typeError, inst, list), null, scope);
         }
+        if (library.isImpureFunction(name, scope)) {
+            if (!inst.options.allowImpureFunctions) {
+                return fin(_wrapError(_impurityError(inst), inst, list), null, scope);
+            }
+            if (inst.options.warnOnImpureFunctions) {
+                Console.printWarning(inst, 'Function `' + name + '` is labeled impure');
+            }
+        }
         var invokeArgs = args.concat(passthrough(fin, scope));
         return lookup.apply(ctx, invokeArgs);
     }
@@ -356,6 +366,11 @@ function _outOfGasError(inst) {
 
 function _badInput(inst) {
     var error = 'Input provided was blank or malformed';
+    return new Error(error);
+}
+
+function _impurityError(inst) {
+    var error = 'Impure functions are not permitted in this program';
     return new Error(error);
 }
 
