@@ -49,7 +49,7 @@ function preflightCheck(inst, entity, library, data) {
                         data[alreadyWarnedKey] = true;
                         Console.printWarning(inst,
                             'Function `' + first +
-                            '` is not defined in the runtime library'
+                            '` is not defined'
                         );
                     }
                 }
