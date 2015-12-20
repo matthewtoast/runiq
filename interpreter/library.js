@@ -70,4 +70,10 @@ Library.prototype.lookupInputs = function(name, scope) {
     return this.scopedLookup('lookupInputs', name, scope) || this.inputs[name];
 };
 
+Library.prototype.isImpureFunction = function(name, scope) {
+    return this.scopedLookup('isImpureFunction', name, scope) || (
+        this.functions[name] && this.functions[name].impure === true
+    );
+};
+
 module.exports = Library;
