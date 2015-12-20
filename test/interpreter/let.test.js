@@ -9,11 +9,12 @@ Tape('interpreter - let', function(t) {
     var interpreter = new RuniqInterpreter(RuniqLib(), { debug: true });
     var program = [
         'let', 'wow', ['quote', ['lambda', 'n', ['quote', ['+', 'n', 'n']]]],
-        'call', 'wow', 123
+        'let', 'whoa', ['quote', ['lambda', ['quote', ['+',3,4]]]],
+        'call', 'wow', 'whoa'
     ];
     var argv = [];
     var event = null;
-    var expected = 246;
+    var expected = 14;
     var callback = function(err, result) {
         t.equal(result, expected);
     };

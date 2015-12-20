@@ -1,2 +1,0 @@
-(define foo a b '(+ a b)
-    '(foo (foo 1 10) (foo 30 3)))

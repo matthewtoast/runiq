@@ -36,7 +36,6 @@ Builder.prototype.defineFunction = function(name, spec) {
     if (this.library.functions[name]) {
         console.warn('Runiq: DSL is redefining function `' + name + '`');
     }
-
     this.library.functions[name] = spec.implementation;
     this.library.inputs[name] = spec.signature[0];
     this.library.outputs[name] = spec.signature[1];
