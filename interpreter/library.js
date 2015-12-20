@@ -26,6 +26,10 @@ Library.prototype.lookupInputs = function(name) {
     return this.data.inputs[name];
 };
 
+Library.prototype.lookupPreprocessor = function(name) {
+    return this.data.preprocessors[name];
+};
+
 Library.prototype.isImpureFunction = function(name) {
     var fn = this.data.functions[name];
     return fn && fn.impure === true;

@@ -40,9 +40,10 @@ function preflightCheck(inst, entity, library, data) {
         if (typeof first === STRING_TYPE) {
             if (first !== QUOTE_NAME) {
                 var lookup;
-                lookup = library.lookupFunction(first, true);
-                if (!lookup) lookup = library.lookupTypeCaster(first, true);
-                if (!lookup) lookup = library.lookupConstant(first, true);
+                lookup = library.lookupFunction(first);
+                if (!lookup) lookup = library.lookupPreprocessor(first);
+                if (!lookup) lookup = library.lookupTypeCaster(first);
+                if (!lookup) lookup = library.lookupConstant(first);
                 if (!lookup) {
                     var alreadyWarnedKey = 'printed-warning-for-' + first;
                     if (!data[alreadyWarnedKey]) {

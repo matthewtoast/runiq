@@ -1,0 +1,3 @@
+(define foo a b '(+ a b))
+(define bar c d '(- c d))
+(foo 2 (bar 7 6))

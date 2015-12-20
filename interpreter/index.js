@@ -36,6 +36,7 @@ RUNIQ_RESERVED_QUOTE_FN_NAMES['quote'] = true;
  * @param [options] {Object} - Options object
  */
 function Interpreter(library, options) {
+    // What lengths I've gone to to use only 7-letter properties...
     this.library = new Library(library || {});
     this.options = Assign({}, Interpreter.DEFAULT_OPTIONS, options);
     this.balance = this.options.balance;
@@ -138,8 +139,61 @@ function nextup(inst, orig, argv, event, cb) {
 // Perform one step of execution to the given list, and return the AST.
 function step(inst, raw, argv, event, fin) {
     if (!_isPresent(raw)) return fin(_wrapError(_badInput(inst), inst, raw), null);
-    var list = _safeObject(_denestList(raw));
-    return branch(inst, list, argv, event, fin);
+    var flat = _denestList(raw);
+    preproc(inst, flat, argv, event, function postPreproc(err, data) {
+        if (err) return fin(err);
+        var list = _safeObject(data);
+        return branch(inst, list, argv, event, fin);
+    });
+}
+
+// Run any preprocessors that are present in the program, please
+function preproc(inst, prog, argv, event, fin) {
+    var info = findPreprocs(inst, prog, [], []);
+    function step(procs, parts, list) {
+        if (!procs || procs.length < 1) {
+            return fin(null, list);
+        }
+        var part = parts.shift();
+        var proc = procs.shift();
+        return proc(part, list, function(err, _list) {
+            if (err) return fin(err);
+            return step(procs, parts, _list);
+        });
+    }
+    return step(info.procs, info.parts, info.list);
+}
+
+// Find all preprocessors in the given program
+function findPreprocs(inst, list, procs, parts) {
+    if (Array.isArray(list)) {
+        while (list.length > 0) {
+            var part = list.shift();
+            // Preprocessors must be the first elements in the list;
+            // if we hit any non-preprocessors, immediately assume
+            // we're done preprocessing and can move on with execution
+            // This is as opposed to doing something like hoisting
+            if (!_isFunc(part)) {
+                list.unshift(part);
+                break;
+            }
+            var name = _getFnName(part);
+            var lookup = inst.library.lookupPreprocessor(name);
+            if (!lookup) {
+                list.unshift(part);
+                break;
+            }
+            if (lookup) {
+                parts.push(part);
+                procs.push(lookup);
+            }
+        }
+    }
+    return {
+        list: list,
+        parts: parts,
+        procs: procs
+    };
 }
 
 // Force flow through a set timeout prior to executing the given list

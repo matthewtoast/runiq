@@ -10,7 +10,8 @@ function Builder(library) {
         functions: {},
         prices: {},
         inputs: {},
-        outputs: {}
+        outputs: {},
+        preprocessors: {}
     }, library || {});
 }
 
@@ -54,6 +55,14 @@ Builder.prototype.aliasType = function(alias, original) {
     this.library.types[alias] = this.library.types[original];
     this.library.casters[alias] = this.library.casters[original];
     this.library.prices[alias] = this.library.prices[original];
+    return this;
+};
+
+Builder.prototype.definePreprocessor = function(name, spec) {
+    if (this.library.preprocessors[name]) {
+        console.warn('Runiq: DSL is redefining preprocessor `' + name + '`');
+    }
+    this.library.preprocessors[name] = spec.implementation;
     return this;
 };
 
