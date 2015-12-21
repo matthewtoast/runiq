@@ -1,6 +1,6 @@
 {
   "name": "runiq",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "main": "index.js",
   "repository": "matthewtoast/runiq",
   "bugs": "https://github.com/matthewtoast/runiq/issues",
