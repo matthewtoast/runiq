@@ -1,0 +1,13 @@
+(component foo a b '($
+    '(set num (- a b))
+    '(get num)
+) num 0)
+
+(component bar d e '($
+    '(set num (- (+ d e) (get num)))
+    '(get num)
+) num 0)
+
+   ; 3 ;         ; -1 ;
+(+ (bar "0" 1 2) (foo "0" 3 4))
+   ; 2 ;

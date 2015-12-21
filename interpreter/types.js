@@ -25,8 +25,8 @@ function runtimeCheck(inst, name, library, args) {
         }
         if (inputs[inputs.length - 1] !== REST_ARG_TYPE) {
             if (inputs.length !== args.length) {
-                message = 'Function `' + name + '` was given ' +
-                          args.length + ' arguments ' +
+                message = 'Function `' + name + '` got ' +
+                          args.length + ' args ' +
                           'but expected ' + inputs.length
                 return new Error(message);
             }

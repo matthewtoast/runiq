@@ -25,7 +25,7 @@
     "lodash.trunc": "^3.0.4",
     "loglevel": "^1.4.0",
     "moment": "^2.10.6",
-    "runegrid.state-wrapper": "0.0.1",
+    "runegrid.state-wrapper": "0.0.2",
     "seedrandom": "^2.4.2",
     "sprintf-js": "^1.0.3",
     "superagent": "^1.4.0",

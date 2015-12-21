@@ -7,6 +7,7 @@ module.exports = function() {
     require('./core')(dsl);
     require('./control')(dsl);
     require('./define')(dsl);
+    require('./component')(dsl);
     require('./http')(dsl);
     require('./package')(dsl);
     return dsl.exportLibrary();
