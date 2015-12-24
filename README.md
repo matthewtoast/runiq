@@ -1,22 +1,24 @@
 # Runiq (WIP)
 
-**Runiq** is a customizable scripting language for tinkerers. Runiq allows engineers to create simple mini-languages with Lisp-like syntax that can run in almost any environment, and which are easy to learn. It's great for making things programmable but only as programmable as you want.
+**Runiq** is a Lisp-inspired scripting language that runs atop JavaScript.
 
-Runiq is three things: (1) A [**syntax**][syntax] for writing functional code snippets, (2) a [**software tool**][tool] for parsing and interpreting Runiq syntax, and (3) a hacker's [**API for DSL-building**][dsl]. Your own Runiq-based mini-language can abstract away complex async logic with little boilerplate.
+Runiq is three things: (1) A [**syntax**][syntax] that makes it easy to express async algorithms as functional data structures, (2) a JavaScript-hosted [**parser and interpreter**][tool] that can run Runiq code on most platforms, and (3) an [**API for DSL-building**][dsl] that you can use to create your own mini-languages.
 
-The Runiq interpreter is written in JavaScript; you can run Runiq scripts most places JavaScript runs. Runiq scripts, including their state, are entirely serializable. In fact, the AST is human-writable JSON. Runiq is free software, released under an **ISC License.**
+Runiq is free software, released under an **ISC License.**
 
 ## Features
 
-* Functional paradigm
-* Minimal, Lisp-esque syntax
+* Lisp-esque syntax
 * Runnable in Node or browser
-* Simple, human-writable JSON AST
-* Trivial async processing
+* Functional paradigm
+* Human-writable JSON AST
+* Async processing
 * Stepwise computation (pause &amp; resume)
 * Code as data, data as code
+* Serializable programs &amp; state
 * DSL builder for developers
 * Localizable
+* Macros _(coming soon)_
 
 ## Example
 
@@ -56,7 +58,7 @@ Runiq may be installed via NPM:
 
 ### Programmatic
 
-Here's the simplest example of how to run a Runiq script:
+Here's the simplest example:
 
     var Runiq = require('runiq');
     Runiq.run("(+ 5 3)", {
@@ -100,7 +102,7 @@ Runiq begain as an experiment in safely running untrusted code. I wanted to crea
 * I could pause long-running (or never-ending) programs...
 * ...and resume them without corrupting their state
 
-Along the way I added more requirements (why not?), such as the ability for engineers to build their own variants of the language, and a syntax, based on Lisp, that could be approachable for beginners yet also appealing to hackers. The result is what you have here.
+Along the way I added more requirements (why not?), such as the ability for engineers to plug their own keywords into the language, and a Lisp-inspired syntax that could be approachable for beginners yet also appealing to hackers. The result is what you have here.
 
 [For more, see the Runiq wiki &raquo;][wiki]
 

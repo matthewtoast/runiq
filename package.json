@@ -14,6 +14,9 @@
     "test": "npm run lint && tape ./test/**/*.test.js | tap-spec",
     "benchmarks": "node test/performance/filter.benchmark.js && node test/performance/fibonacci.benchmark.js"
   },
+  "browser": {
+    "fs": false
+  },
   "dependencies": {
     "commander": "^2.9.0",
     "crypto-js": "^3.1.5",
@@ -25,7 +28,7 @@
     "lodash.trunc": "^3.0.4",
     "loglevel": "^1.4.0",
     "moment": "^2.10.6",
-    "runegrid.state-wrapper": "0.0.2",
+    "runegrid.state-wrapper": "0.0.3",
     "seedrandom": "^2.4.2",
     "sprintf-js": "^1.0.3",
     "superagent": "^1.4.0",

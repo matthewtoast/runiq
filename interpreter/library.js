@@ -35,4 +35,8 @@ Library.prototype.isImpureFunction = function(name) {
     return fn && fn.impure === true;
 };
 
+Library.prototype.doOmitUndefinedWarningFor = function(name) {
+    return !!(name in this.data.omissions);
+};
+
 module.exports = Library;

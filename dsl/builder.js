@@ -11,7 +11,8 @@ function Builder(library) {
         prices: {},
         inputs: {},
         outputs: {},
-        preprocessors: {}
+        preprocessors: {},
+        omissions: {}
     }, library || {});
 }
 
@@ -63,6 +64,11 @@ Builder.prototype.definePreprocessor = function(name, spec) {
         console.warn('Runiq: DSL is redefining preprocessor `' + name + '`');
     }
     this.library.preprocessors[name] = spec.implementation;
+    return this;
+};
+
+Builder.prototype.omitUndefinedWarning = function(name) {
+    this.library.omissions[name] = true;
     return this;
 };
 

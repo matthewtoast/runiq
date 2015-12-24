@@ -39,19 +39,21 @@ function preflightCheck(inst, entity, library, data) {
         var first = entity[0];
         if (typeof first === STRING_TYPE) {
             if (first !== QUOTE_NAME) {
-                var lookup;
-                lookup = library.lookupFunction(first);
-                if (!lookup) lookup = library.lookupPreprocessor(first);
-                if (!lookup) lookup = library.lookupTypeCaster(first);
-                if (!lookup) lookup = library.lookupConstant(first);
-                if (!lookup) {
-                    var alreadyWarnedKey = 'printed-warning-for-' + first;
-                    if (!data[alreadyWarnedKey]) {
-                        data[alreadyWarnedKey] = true;
-                        Console.printWarning(inst,
-                            'Function `' + first +
-                            '` is not defined'
-                        );
+                if (!library.doOmitUndefinedWarningFor(first)) {
+                    var lookup;
+                    lookup = library.lookupFunction(first);
+                    if (!lookup) lookup = library.lookupPreprocessor(first);
+                    if (!lookup) lookup = library.lookupTypeCaster(first);
+                    if (!lookup) lookup = library.lookupConstant(first);
+                    if (!lookup) {
+                        var alreadyWarnedKey = 'printed-warning-for-' + first;
+                        if (!data[alreadyWarnedKey]) {
+                            data[alreadyWarnedKey] = true;
+                            Console.printWarning(inst,
+                                'Function `' + first +
+                                '` is not defined'
+                            );
+                        }
                     }
                 }
             }

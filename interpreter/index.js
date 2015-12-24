@@ -5,6 +5,7 @@ var CloneDeep = require('lodash.clonedeep');
 var Console = require('./console');
 var IsEqual = require('lodash.isequal');
 var Library = require('./library');
+var Storage = require('./storage');
 var Types = require('./types');
 
 var JS_STRING_TYPE = 'string';
@@ -35,14 +36,15 @@ RUNIQ_RESERVED_QUOTE_FN_NAMES['quote'] = true;
  * @param [library] {Object} - Library dictionary
  * @param [options] {Object} - Options object
  */
-function Interpreter(library, options) {
+function Interpreter(library, options, storage) {
     // What lengths I've gone to to use only 7-letter properties...
-    this.library = new Library(library || {});
+    this.library = new Library(CloneDeep(library || {}));
     this.options = Assign({}, Interpreter.DEFAULT_OPTIONS, options);
     this.balance = this.options.balance;
     this.timeout = Date.now() + this.options.timeout;
     this.seednum = this.options.seed || Math.random();
     this.counter = this.options.count || 0;
+    this.storage = storage || new Storage();
 };
 
 var DEFAULT_TX_PRICE = -1;
@@ -58,8 +60,8 @@ Interpreter.DEFAULT_OPTIONS = {
     doRuntimeTypeCheck: true,
     doPreflightTypeCheck: true,
     functionMissingName: 'function-missing',
-    allowImpureFunctions: true,
-    warnOnImpureFunctions: true
+    doAllowImpureFunctions: true,
+    doWarnOnImpureFunctions: true
 };
 
 /**
@@ -95,6 +97,21 @@ Interpreter.prototype.run = function(list, argv, event, cb) {
 Interpreter.prototype.step = function(list, argv, event, cb) {
     if (this.options.debug) Console.printDebug(this, list);
     return step(this, list, argv, event, cb);
+};
+
+/**
+ * Return a snapshot of the internal state of the interpreter,
+ * including any objects which may have been added to the storage.
+ *
+ * @method state
+ * @returns {Object}
+*/
+Interpreter.prototype.state = function() {
+    return {
+        seednum: this.seednum,
+        counter: this.counter,
+        storage: this.storage.export()
+    };
 };
 
 // Update balance with debit/credit; return T/F if script can continue.
@@ -156,7 +173,14 @@ function preproc(inst, prog, argv, event, fin) {
         }
         var part = parts.shift();
         var proc = procs.shift();
-        return proc(part, list, function(err, _list) {
+        var ctx = {
+            id: inst.counter,
+            seed: inst.seednum,
+            store: inst.storage,
+            argv: argv,
+            event: event
+        };
+        return proc.call(ctx, part, list, function(err, _list) {
             if (err) return fin(err);
             return step(procs, parts, _list);
         });
@@ -179,6 +203,7 @@ function findPreprocs(inst, list, procs, parts) {
             }
             var name = _getFnName(part);
             var lookup = inst.library.lookupPreprocessor(name);
+
             if (!lookup) {
                 list.unshift(part);
                 break;
@@ -264,6 +289,7 @@ function invoke(inst, list, argv, event, fin) {
     var ctx = {
         id: inst.counter,
         seed: inst.seednum,
+        store: inst.storage,
         name: name,
         list: list,
         args: args,
@@ -296,10 +322,10 @@ function invoke(inst, list, argv, event, fin) {
             if (typeError) return fin(_wrapError(typeError, inst, list), null);
         }
         if (library.isImpureFunction(name)) {
-            if (!inst.options.allowImpureFunctions) {
+            if (!inst.options.doAllowImpureFunctions) {
                 return fin(_wrapError(_impurityError(inst), inst, list), null);
             }
-            if (inst.options.warnOnImpureFunctions) {
+            if (inst.options.doWarnOnImpureFunctions) {
                 Console.printWarning(inst, 'Function `' + name + '` is labeled impure');
             }
         }
@@ -486,7 +512,8 @@ function _compactList(list) {
 }
 
 function _isFunc(list) {
-    return typeof list[RUNIQ_INDEX_OF_FUNCTION_NAME] === JS_STRING_TYPE;
+    return Array.isArray(list) &&
+           typeof list[RUNIQ_INDEX_OF_FUNCTION_NAME] === JS_STRING_TYPE;
 }
 
 function _isList(thing) {
