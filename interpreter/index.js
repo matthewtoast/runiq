@@ -122,6 +122,18 @@ Interpreter.prototype.state = function() {
     };
 };
 
+/**
+ * Return a snapshot of any outputs that may have been logged
+ * to the interpreter.
+ *
+ * @method outputs
+ * @returns {Object}
+*/
+Interpreter.prototype.output = function(doSplice) {
+    if (doSplice) return this.outputs.splice(0);
+    else return this.outputs;
+};
+
 // Update balance with debit/credit; return T/F if script can continue.
 function ok(inst, transaction) {
     if (transaction === undefined) transaction = 0;
