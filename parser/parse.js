@@ -18,6 +18,7 @@ var TYPES = {
     close: 'close',
     identifier: 'identifier',
     number: 'number',
+    suffixed_number: 'suffixed_number',
     string: 'string',
     json: 'json',
     open_array: 'open_array',
@@ -71,6 +72,7 @@ function parse(tokens) {
                 break;
 
             case TYPES.identifier:
+            case TYPES.suffixed_number:
                 current.push(token.string);
                 break;
 
