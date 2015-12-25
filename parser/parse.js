@@ -63,6 +63,8 @@ function parse(tokens) {
 
             case TYPES.close_array:
             case TYPES.close:
+                // If no current, we probably have too many closing parens
+                if (!current) _tooManyClosingParensErr(closeCount, openCount);
                 // If we close a list, jump back up to the parent list
                 current = current.parent;
                 closeCount += 1;
@@ -103,22 +105,26 @@ function parse(tokens) {
         else _char += token.string.length;
     }
 
-    if (openCount > closeCount) {
-        throw new Error([
-            'Runiq: Missing closing parentheses!',
-            '--- Found ' + closeCount + ' parentheses, but expected ' + openCount
-        ].join('\n'));
-    }
-
-    if (openCount < closeCount) {
-        throw new Error([
-            'Runiq: Too many closing parentheses!',
-            '--- Found ' + closeCount + ' parentheses, but expected ' + openCount
-        ].join('\n'));
-    }
+    // Raise error if we have a parentheses mismatch
+    if (openCount > closeCount) _tooManyOpenParensErr(closeCount, openCount);
+    if (openCount < closeCount) _tooManyClosingParensErr(closeCount, openCount);
 
     // For both safety and to ensure we actually have a JSON-able AST
     return JSON.parse(JSONStableStringify(ast));
+}
+
+function _tooManyClosingParensErr(closeCount, openCount) {
+    throw new Error([
+        'Runiq: Too many closing parentheses!',
+        '--- Found ' + closeCount + ' parentheses, but expected ' + openCount
+    ].join('\n'));
+}
+
+function _tooManyOpenParensErr(closeCount, openCount) {
+    throw new Error([
+        'Runiq: Missing closing parentheses!',
+        '--- Found ' + closeCount + ' parentheses, but expected ' + openCount
+    ].join('\n'));
 }
 
 module.exports = parse;
