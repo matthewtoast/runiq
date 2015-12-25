@@ -45,6 +45,13 @@ function Interpreter(library, options, storage) {
     this.seednum = this.options.seed || Math.random();
     this.counter = this.options.count || 0;
     this.storage = storage || new Storage();
+
+    var outputs = this.outputs = [];
+    if (this.options.doCaptureConsole) {
+        Console.capture(function(type, messages) {
+            outputs.push({ type: type, messages: messages });
+        });
+    }
 };
 
 var DEFAULT_TX_PRICE = -1;
@@ -61,7 +68,8 @@ Interpreter.DEFAULT_OPTIONS = {
     doPreflightTypeCheck: true,
     functionMissingName: 'function-missing',
     doAllowImpureFunctions: true,
-    doWarnOnImpureFunctions: true
+    doWarnOnImpureFunctions: true,
+    doCaptureConsole: true
 };
 
 /**

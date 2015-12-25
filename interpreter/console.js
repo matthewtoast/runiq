@@ -2,6 +2,27 @@
 
 var Trunc = require('lodash.trunc');
 
+function capture(fn) {
+    var oldLog = console.log;
+    var oldWarn = console.warn;
+    var oldError = console.error;
+
+    console.log = function() {
+        fn('log', arguments);
+        oldLog.apply(console, arguments);
+    };
+
+    console.warn = function() {
+        fn('warn', arguments);
+        oldWarn.apply(console, arguments);
+    };
+
+    console.error = function() {
+        fn('error', arguments);
+        oldError.apply(console, arguments);
+    };
+}
+
 function printDebug(inst, thing) {
     printMessage('DEBUG', inst, thing);
 }
@@ -28,6 +49,7 @@ function printMessage(type, inst, thing) {
 }
 
 module.exports = {
+    capture: capture,
     printDebug: printDebug,
     printWarning: printWarning,
     printError: printError,
