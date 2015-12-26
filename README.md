@@ -6,6 +6,8 @@ Runiq is three things: (1) A [**syntax**][syntax] that makes it easy to express 
 
 Runiq is free software, released under an **ISC License.**
 
+**[Try Runiq &mdash;][try]**
+
 ## Features
 
 * Lisp-esque syntax
@@ -154,3 +156,4 @@ ISC License. See LICENSE.txt.
 [syntax]: https://github.com/matthewtoast/runiq/wiki/Syntax
 [tool]: https://github.com/matthewtoast/runiq/wiki/Usage
 [dsl]: https://github.com/matthewtoast/runiq/wiki/DSL-Builder
+[try]: http://matthewtoast.github.io/runiq/
