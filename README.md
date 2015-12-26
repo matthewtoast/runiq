@@ -6,7 +6,7 @@ Runiq is three things: (1) A [**syntax**][syntax] that makes it easy to express 
 
 Runiq is free software, released under an **ISC License.**
 
-**[Try Runiq &mdash;][try]**
+**[Try Runiq &raquo;][try]**
 
 ## Features
 
