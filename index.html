@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Try Runiq</title>
+  <meta name="viewport" content="width=device-width">
+  <script src="https://use.edgefonts.net/source-sans-pro:n3,n4,n7.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+<div class="container">
+<h1 class="h1">Try Runiq</h1>
+
+
+<p class="display">Here are a few short examples of <a href="https://github.com/matthewtoast/runiq">Runiq</a> code. The idea here is to give just a general sense of what it's like to write scripts in Runiq &mdash; not a comprehensive overview. For more info about what Runiq is and why you might use it, <a href="https://github.com/matthewtoast/runiq">see the Runiq repo on GitHub</a>.</p>
+
+
+<p class="display">Runiq is free, open-source software released under an ISC License. It's a personal side project of <a href="http://trost.co">Matthew Trost</a> and remains very much a work in progress. At the moment, it's more about learning and exploring ideas than for writing production caliber software. Nonetheless, I welcome any constructive thoughts, feedback, and feature ideas.</p>
+
+
+<h2 class="h2">Hello World:</h2>
+<div style="height: 360px;">
+<script type="text/x-runiq">
+;
+This simple Runiq program prints the message "Hello World"
+to the development console. You can view printed messages by
+opening your browser's developer tools, or within the "Log"
+panel at bottom-left of this editor frame.
+
+This editor isn't intended to be a full IDE - it's just a
+little thingamabob I hacked together to demonstrate Runiq.
+The "AST" panel will display the current program AST, and
+the "Instance State" will give the interpreter's state.
+
+If there's something to render (see below), it will appear
+in the panel to the right.
+;
+
+(print "Hello World")
+</script>
+</div>
+
+
+
+<br>
+<h2 class="h2">Rendering to the DOM with runiq-vdom:</h2>
+<div style="height: 420px;">
+<script type="text/x-runiq">
+;
+Runiq was built around the idea that developers could easily
+plug in language keywords using a JavaScript API. One such
+plugin is runiq-vdom, a simple package I wrote that we'll use
+in several examples here.
+
+runiq-vdom is just an npm package that uses the Runiq
+DSL-building API to establish a 'vdom' function plus a
+set of ':'-prefixed HTML tag functions. It's far from
+fully featured but it can do basic rendering. See here:
+https://github.com/matthewtoast/runiq-vdom
+
+(Runiq isn't a DOM-centric language, but it does lend
+itself naturally to expressing trees. This code happens
+to be executed in a web worker and its output is passed
+in a message to a renderer in the UI thread.)
+;
+
+(vdom (:p "Hello World!"))
+</script>
+</div>
+
+
+
+<br>
+<h2 class="h2">Control functions:</h2>
+<div style="height: 600px;">
+<script type="text/x-runiq">
+;
+In this more interesting example, we see a few of Runiq's
+control functions including 'lambda', 'ycomb', and 'if'.
+Just like 'vdom', these functions are not defined by Runiq
+at the language level, but are actually plugins. See here:
+https://github.com/matthewtoast/runiq/tree/master/library
+
+This example also shows use of quoting. Since Runiq will
+attempt to evaluate any dependency it finds immediately,
+quoting is provided if the programmer wants a list to be
+evaluated later. To quote a list, simply prefix it with a
+single quote.
+
+Runiq is interpreted by JavaScript, and some of JavaScript's
+flexible nature bleeds through into Runiq. Notice that we
+don't need to explicitly cast 'num' to a string.
+;
+
+(lambda num
+  '(vdom
+    (:p "Fibonacci value for " num " is "
+      ; Recursive Fibonacci ;
+      (ycomb (lambda fn n
+        '(if (<= n 2)
+          '(1)
+         else
+          '(+ (ycomb fn (- n 1))
+              (ycomb fn (- n 2))))) num))) 8)
+</script>
+</div>
+
+
+
+<br>
+<h2 class="h2">String, lists, and hashes (associative arrays):</h2>
+<div style="height: 680px;">
+<script type="text/x-runiq">
+;
+Runiq ships with a large collection of core plugins for
+dealing with strings, lists (arrays), and hashes (a.k.a.
+associative arrays). Most of these functions have names
+that begin with the data-type followed by a single dot.
+
+(The dot in the function name isn't special. As a rule,
+keywords can contain any character except for brackets,
+parentheses, double-quotes, and backticks, since those
+characters are reserved for other entities.)
+;
+
+(vdom
+  (:p (str.snake-case "Multiline
+                       strings are
+                       supported"))
+
+  (:ul
+    (list.map [There's also sugar for quoted lists] (lambda word '(
+      (:ul word)))))
+
+  (:pre
+    (:code
+      (hash style "background-color: black; overflow: hidden;")
+      (hash.to-json `{
+          "you can use": "multiline backtick syntax",
+          "for": [
+            "putting JSON data structures",
+            "directly into",
+            "the AST"
+          ]
+        }`))))
+</script>
+</div>
+
+
+
+<br>
+<h2 class="h2">Math, dates/times, and regular expressions:</h2>
+<div style="height: 500px;">
+<script type="text/x-runiq">
+;
+Runiq also ships with a variety of functions for common
+programming tasks, including math functions, basic
+cryptographic functions, regexp functions, and date
+and time (collectively "moment") functions.
+
+Under the hood, these plugins are implemented using open
+source JavaScript libraries including the excellent Crypto-JS
+and Moment.js. If you're interested in Runiq, consider
+writing your own language keywords!
+
+Lodash is also used extensively under the hood to implement
+many functions for working with objects, collections,
+and strings.
+;
+
+(vdom (list.map (list (moment.now)
+                      (regexp.replace "l+a" "Edgar Allan Poe" "WOW")
+                      (math.sin 123)
+                      (crypto.md5 "Howdy"))
+                      (lambda data '(
+                        (:div data)
+                      ))))
+</script>
+</div>
+
+
+
+<br>
+<h2 class="h2">HTTP:</h2>
+<div style="height: 660px;">
+<script type="text/x-runiq">
+;
+Runiq also comes with the basics for making HTTP requests,
+backed by the Superagent library.
+
+In the example here, we also make use of the 'define'
+function to wrap up an HTTP request method. 'define' is
+implemented as a preprocessor, so it runs before all
+other code at the same level. Preprocessors are just as
+easy to create with Runiq's DSL builder as normal
+functions. The only difference is their job is to modify
+the AST wholesale instead of just returning a value.
+
+(Preprocessors are kind of like macros that can be
+defined from the JavaScript side of Runiq.)
+
+Another thing worth noting is that async code can be
+expressed in Runiq without any special syntax such
+as callbacks. In the code below, notice that 'http.get'
+(async function) is simply given as an argument 
+(dependency) of the function 'str.parse-json'. That's
+all Runiq needs to know.
+;
+
+(define http-get-json url '(
+  (str.parse-json (http.get url "" "" ""))
+))
+
+(vdom 
+  (:textarea (hash style "width: 100%;")
+    (hash.to-json (http-get-json
+      "http://jsonplaceholder.typicode.com/posts/1"))))
+</script>
+</div>
+
+
+
+<br>
+<h2 class="h2">Stateful components:</h2>
+<div style="height: 800px;">
+<script type="text/x-runiq">
+;
+The 'component' function comes with the Runiq package.
+It's a preprocessor, so it runs before all subsequent
+code at the same level. Calling it defines a component
+that may be instantiated by name. 'component' is the only
+stateful function provided with Runiq by default. It has
+the form (component name …params body …defaults).
+
+The '$' function below is a shorthand for 'series', which
+executes its arguments in series. By default, Runiq
+runs all functions in parallel. 'series' is provided
+as an opt-out when same-level processing order matters,
+such as when an event should be handled prior to the
+rest executing. It has the form ($ …lists).
+;
+
+(component TodoList title _color '($
+
+  ;
+  'on', 'do', 'get', and 'set' below are special functions
+  established by the 'component' preprocessor. They don't
+  have meaning by themselves, but are actually transformed
+  by the preprocessor into lambdas that receive references
+  to underlying stateful objects. (See the "Instance State"
+  panel at bottom-right to view them.)
+  ;
+
+  '(on update payload '(set text (hash.get payload target.value)))
+  '(on add payload '(set items (list.push (get items) (get text))))
+
+  '(list
+    (:div
+      (:h3 title)
+
+      ;
+      The '#' function is a shorthand for 'hash', which
+      creates a basic hash from its arguments. It assumes
+      an even number of arguments: key value key value ...
+      ;
+
+      (:input (# onkeyup (do update)))
+      (:button "Add Item" (# onclick (do add)))
+      (:ul (list.map (get items) (lambda item '(
+        (:li item)
+      )))))
+
+    ;
+    The 'runiq-vdom' package provides a 'style' function that
+    returns a hash object that the UI renderer knows how to
+    apply to the component. You can put it anywhere within a
+    component body, but it will only apply to elements
+    at its level and below (this can be convenient if you
+    need finer control over scoping).
+    ;
+
+    (style
+      '(div
+        background-color _color
+        border-radius 4 ; runiq-vdom converts to "4px" ;
+        color white
+        font-family "Helvetica, Arial, sans-serif"
+        margin 10
+        padding 10)
+      '(button
+        background-color "white"
+        border none
+        border-radius 4
+        color _color
+        outline none)
+      '(input
+        color #666
+        margin-bottom 10
+        margin-right 10
+        outline none
+        max-width 100%)))
+
+  ;
+  The component definition's final arguments are set as
+  the initial state for each component instance of the
+  designated type. The square-bracket syntax [] is sugar
+  for '(), i.e., a quoted list.
+  ;
+
+) items [] text "")
+
+;
+In a list of lists (like this program), Runiq returns the
+last list. In this case, our program's final list calls
+`vdom`, which returns an HTML-like object.
+;
+
+(vdom (list
+  (:h1 "Hello Runiq" (# style "color: white; margin: 10px; font-family: sans-serif;"))
+
+  ;
+  Instantiate a 'TodoList' with the unique component key
+  "main" plus an argument for the instance's 'title' and
+  'color'. The key is used under the hood to match instances
+  across multiple runs of the same code. Note: This kind of
+  stateful behavior is only provided via the 'component'
+  function - other built-in Runiq functions are pure.
+
+  Also note that the 'component' function isn't just about
+  the DOM. It's actually just a generic component with some
+  sugar for managing events and internal state. You could
+  use it in any Runiq program, even one that doesn't do
+  any UI rendering.
+  ;
+
+  (TodoList "main" "First Todos" "#AA80ED")
+
+  ; Etc. ;
+
+  (TodoList "other" "Second Todos" "#7259BA")
+))
+
+</script>
+</div>
+
+<br>
+<br>
+<br>
+<p>Copyright &copy; 2015-2016 Matthew Trost</p>
+</div>
+
+
+  <script src="index.bundle.js"></script>
+  <script>
+    (function() {
+      function stripIndent(str) {
+        var match = str.match(/^[ \t]*(?=\S)/gm);
+        if (!match) return str;
+        var indent = Math.min.apply(Math, match.map(function (el) {
+          return el.length;
+        }));
+        var re = new RegExp('^[ \\t]{' + indent + '}', 'gm');
+        return indent > 0 ? str.replace(re, '') : str;
+      }
+
+      var scripts = document.querySelectorAll('script[type="text/x-runiq"]');
+
+      for (var i = 0; i < scripts.length; i++) {
+        var script = scripts[i];
+        var code = stripIndent(script.innerHTML);
+        code = code.replace(/\n/, ''); // Replace blank first newline
+        var frame = document.createElement('div');
+        frame.className = 'frame';
+        script.parentNode.insertBefore(frame, script);
+        var editor = new RuniqEditor(frame, code);
+        editor.deploy();
+        editor.update();
+      }
+
+    }())
+  </script>
+</body>
+</html>
