@@ -1,6 +1,6 @@
 # Runiq (WIP)
 
-**Runiq** is a Lisp-inspired scripting language that runs atop JavaScript.
+**Runiq** is a little Lisp-inspired scripting language that runs atop JavaScript.
 
 Runiq is three things: (1) A [**syntax**][syntax] that makes it easy to express async algorithms as functional data structures, (2) a JavaScript-hosted [**parser and interpreter**][tool] that can run Runiq code on most platforms, and (3) an [**API for DSL-building**][dsl] that you can use to create your own mini-languages.
 
