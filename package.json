@@ -1,11 +1,12 @@
 {
   "name": "runiq",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "index.js",
   "repository": "matthewtoast/runiq",
   "bugs": "https://github.com/matthewtoast/runiq/issues",
   "description": "A little scripting language interpreted by JavaScript and inspired by Lisp",
   "author": "Matthew Trost <matthew@trost.co>",
+  "license": "ISC",
   "bin": {
     "runiq": "bin/runiq.js"
   },
