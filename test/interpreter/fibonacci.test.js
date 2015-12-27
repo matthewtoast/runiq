@@ -19,11 +19,11 @@ Tape('interpreter - fibonacci recursive', function(t) {
                     ]]
                 ]
             ]],
-            8
+            16
         ]
     ];
     var argv = [];
-    var expected = 21;
+    var expected = 987;
     var callback = function(err, result) {
         t.equal(result, expected);
     };
