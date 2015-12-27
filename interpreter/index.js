@@ -263,6 +263,7 @@ function branch(inst, list, argv, event, fin) {
     }
     catch (e) {
         return setTimeout(function branchCallback() {
+            Console.printWarning(inst, "Caught call stack error: " + e);
             return unload(inst, list, argv, event, fin);
         }, 0);
     }
