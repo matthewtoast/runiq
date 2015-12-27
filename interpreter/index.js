@@ -69,7 +69,7 @@ Interpreter.DEFAULT_OPTIONS = {
     functionMissingName: 'function-missing',
     doAllowImpureFunctions: true,
     doWarnOnImpureFunctions: true,
-    doCaptureConsole: true
+    doCaptureConsole: false
 };
 
 /**
