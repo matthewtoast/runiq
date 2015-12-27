@@ -423,7 +423,7 @@ function postSequence(elems, fin) {
 // Return a function to patch a subroutine result into a parent list
 function edit(inst, list, index, argv, event, fin) {
     return function editCallback(err, data) {
-        if (err) return fin(err, null);
+        if (err) return fin(err);
         list[index] = data;
         return fin(null, list);
     };
